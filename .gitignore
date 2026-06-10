@@ -1,0 +1,67 @@
+# =========================
+# VARIABLES DE ENTORNO
+# =========================
+.env
+.env.local
+.env.development
+.env.production
+
+# Mantener ejemplo sin datos sensibles
+!.env.example
+
+
+# =========================
+# ENTORNOS VIRTUALES PYTHON
+# =========================
+.venv/
+venv/
+env/
+ENV/
+
+
+# =========================
+# CACHE PYTHON
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+
+# =========================
+# FASTAPI / UVICORN / LOGS
+# =========================
+*.log
+logs/
+
+
+# =========================
+# ARCHIVOS TEMPORALES
+# =========================
+*.tmp
+*.temp
+.cache/
+
+
+# =========================
+# SISTEMA OPERATIVO
+# =========================
+.DS_Store
+Thumbs.db
+
+
+# =========================
+# IDE / EDITORES
+# =========================
+.vscode/
+.idea/
+
+
+# =========================
+# DOCKER / LOCAL
+# =========================
+docker-compose.override.yml

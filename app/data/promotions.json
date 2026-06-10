@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "titulo": "Combo regalo personalizado",
+    "descripcion": "Incluye agenda en madera, llavero y portacelular personalizado.",
+    "precio": 85000
+  },
+  {
+    "id": 2,
+    "titulo": "Portarretrato LED personalizado",
+    "descripcion": "Detalle personalizado con foto, dedicatoria y luz LED.",
+    "precio": 60000
+  }
+]

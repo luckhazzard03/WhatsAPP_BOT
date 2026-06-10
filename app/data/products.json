@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "nombre": "Agenda en madera personalizada",
+    "precio": 45000,
+    "descripcion": "Agenda en madera con diseño personalizado para regalo.",
+    "imagen": "https://example.com/agenda.jpg"
+  },
+  {
+    "id": 2,
+    "nombre": "Llavero personalizado",
+    "precio": 12000,
+    "descripcion": "Llavero personalizado con nombre, frase o diseño especial.",
+    "imagen": "https://example.com/llavero.jpg"
+  },
+  {
+    "id": 3,
+    "nombre": "Portacelular personalizado",
+    "precio": 30000,
+    "descripcion": "Portacelular en madera con diseño personalizado.",
+    "imagen": "https://example.com/portacelular.jpg"
+  },
+  {
+    "id": 4,
+    "nombre": "Portarretrato LED",
+    "precio": 60000,
+    "descripcion": "Portarretrato personalizado con luz LED de colores.",
+    "imagen": "https://example.com/portarretrato-led.jpg"
+  }
+]
