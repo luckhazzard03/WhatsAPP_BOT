@@ -1,115 +1,107 @@
-# Importamos herramientas de FastAPI para crear rutas
+import json
+
 from fastapi import APIRouter, Request, Response
 
-# Importamos la configuración del proyecto
 from app.core.config import settings
-
-# Importamos el servicio principal del bot
 from app.services.bot_service import BotService
 
 
-# Creamos un router para agrupar endpoints relacionados con WhatsApp
 router = APIRouter(tags=["WhatsApp Webhook"])
-
-# Creamos una instancia del bot
 bot_service = BotService()
 
 
 @router.get("/webhook")
 async def verify_webhook(request: Request):
     """
-    Endpoint GET usado por Meta para verificar el webhook.
-
-    Cuando configuras en Meta:
-    - URL de devolución de llamada
-    - Verify token
-
-    Meta llama esta ruta con:
-    - hub.mode
-    - hub.verify_token
-    - hub.challenge
-
-    Si el token coincide, debemos devolver el challenge.
+    Meta usa este GET para verificar el webhook.
+    Si el token coincide, devolvemos el challenge.
     """
 
-    # Obtenemos los parámetros enviados por Meta
     params = request.query_params
 
-    # Modo de verificación enviado por Meta
     mode = params.get("hub.mode")
-
-    # Token que Meta nos devuelve para comparar
     token = params.get("hub.verify_token")
-
-    # Challenge que debemos retornar si todo está bien
     challenge = params.get("hub.challenge")
 
-    # Validamos que el modo sea subscribe y que el token coincida con el .env
+    print("Verificación webhook recibida:")
+    print("mode:", mode)
+    print("token:", token)
+    print("challenge:", challenge)
+
     if mode == "subscribe" and token == settings.verify_token:
         return Response(content=challenge, media_type="text/plain")
 
-    # Si el token no coincide, rechazamos la verificación
     return Response(content="Token inválido", status_code=403)
 
 
 @router.post("/webhook")
 async def receive_webhook(request: Request):
     """
-    Endpoint POST usado por Meta para enviar eventos.
-
-    Aquí llegan:
-    - Mensajes entrantes
-    - Estados de mensajes
-    - Otros eventos relacionados con WhatsApp
-
-    En este caso procesamos mensajes de texto.
+    Meta usa este POST para enviar mensajes entrantes.
+    Aquí procesamos los mensajes de WhatsApp.
     """
 
-    # Leemos el cuerpo JSON que envía Meta
-    body = await request.json()
+    # Leemos el body crudo primero
+    raw_body = await request.body()
 
-    # Imprimimos el JSON para depuración local
+    # Si llega vacío, no intentamos convertirlo a JSON
+    if not raw_body:
+        print("POST /webhook recibido sin body")
+        return {
+            "status": "empty_body",
+            "message": "La petición llegó sin JSON"
+        }
+
+    # Intentamos convertir el body a JSON
+    try:
+        body = json.loads(raw_body)
+    except json.JSONDecodeError as error:
+        print("JSON inválido recibido:", raw_body)
+        print("Error:", error)
+
+        return {
+            "status": "invalid_json",
+            "message": "El body recibido no es un JSON válido"
+        }
+
     print("Webhook recibido:", body)
 
     try:
-        # Meta puede enviar varias entradas en el mismo webhook
         entries = body.get("entry", [])
 
-        # Recorremos cada entrada
         for entry in entries:
             changes = entry.get("changes", [])
 
-            # Recorremos cada cambio dentro de la entrada
             for change in changes:
                 value = change.get("value", {})
 
-                # Obtenemos mensajes entrantes
                 messages = value.get("messages", [])
 
-                # Recorremos cada mensaje recibido
-                for message in messages:
-                    # Número del cliente que escribió
-                    phone = message.get("from")
+                # Si no hay mensajes, puede ser un evento de estado.
+                if not messages:
+                    print("Webhook sin mensajes. Puede ser status/update.")
+                    continue
 
-                    # Tipo de mensaje: text, image, audio, etc.
+                for message in messages:
+                    phone = message.get("from")
                     message_type = message.get("type")
 
-                    # Por ahora solo procesamos mensajes de texto
+                    print("Tipo de mensaje:", message_type)
+                    print("Número origen:", phone)
+
                     if message_type == "text":
                         text = message.get("text", {}).get("body", "")
 
-                        # Enviamos el mensaje al servicio del bot
+                        print("Texto recibido:", text)
+
                         await bot_service.process_text_message(phone, text)
 
-        # Respuesta exitosa para que Meta sepa que recibimos el evento
         return {"status": "ok"}
 
     except Exception as error:
-        # Si algo falla, imprimimos el error
         print("Error procesando webhook:", error)
 
-        # Retornamos el error en formato JSON
         return {
             "status": "error",
-            "detail": str(error),
+            "detail": str(error)
         }
